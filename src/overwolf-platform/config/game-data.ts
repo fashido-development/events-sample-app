@@ -623,6 +623,13 @@ const data: { [id: number]: GameData } = {
     ],
     description: 'Spectre data',
   },
+  24542: {
+    interestedInFeatures: [
+      'game_info',
+      'match_info'
+    ],
+    description: 'Call Of Duty Black Ops 6',
+  },
 };
 
 export default data;
