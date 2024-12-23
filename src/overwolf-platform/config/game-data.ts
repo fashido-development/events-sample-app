@@ -80,7 +80,6 @@ const data: { [id: number]: GameData } = {
     interestedInFeatures: [
       'kill',
       'death',
-      'killer',
       'me',
       'match_info',
       'game_info',
@@ -629,6 +628,23 @@ const data: { [id: number]: GameData } = {
       'match_info'
     ],
     description: 'Call Of Duty Black Ops 6',
+  },
+  24886: {
+    interestedInFeatures: [
+      'kill',
+      'death',
+      'me',
+      'match_info',
+      'game_info',
+    ],
+    description: 'POE 2 data',
+  },
+  24346: {
+    interestedInFeatures: [
+      'game_info',
+      'match_info'
+    ],
+    description: 'Supervive',
   },
 };
 
