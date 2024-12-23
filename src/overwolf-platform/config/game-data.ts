@@ -645,7 +645,16 @@ const data: { [id: number]: GameData } = {
       'match_info'
     ],
     description: 'Supervive',
+    
   },
+  24890: {
+    interestedInFeatures: [
+      'game_info',
+      'match_info'
+    ],
+    description: 'Call Of Duty Black Ops 6',
+  }
+
 };
 
 export default data;
