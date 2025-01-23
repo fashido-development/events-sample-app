@@ -26,6 +26,7 @@ const data: { [id: number]: GameData } = {
       'damage',
       'heal',
       `gold`,
+      `location`,
     //'live_client_data',
       'jungle_camps',
       'team_frames',
