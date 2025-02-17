@@ -654,6 +654,14 @@ const data: { [id: number]: GameData } = {
       'match_info'
     ],
     description: 'Call Of Duty Black Ops 6',
+  },
+  22894: {
+    interestedInFeatures: [
+      'game_info',
+      'match_info'
+    ],
+    description: 'Street Fighter 6',
+    
   }
 
 };
