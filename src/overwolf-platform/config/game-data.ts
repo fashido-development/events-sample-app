@@ -653,7 +653,7 @@ const data: { [id: number]: GameData } = {
       'game_info',
       'match_info'
     ],
-    description: 'Call Of Duty Black Ops 6',
+    description: 'Marvel Rivals',
   },
   22894: {
     interestedInFeatures: [
@@ -661,9 +661,21 @@ const data: { [id: number]: GameData } = {
       'match_info'
     ],
     description: 'Street Fighter 6',
-    
-  }
-
+  },
+    25446: {
+      interestedInFeatures: [
+        'game_info',
+        'match_info'
+      ],
+      description: 'Monster Hunter Wilds',
+  },
+  25448: {
+    interestedInFeatures: [
+      'game_info',
+      'match_info'
+    ],
+    description: 'REPO',
+  },
 };
 
 export default data;
