@@ -450,7 +450,7 @@ const data: { [id: number]: GameData } = {
   23222: {
     interestedInFeatures: [
       'match_info',
-      `location`
+      'location'
     ],
     description: 'Starfield data',
   },
