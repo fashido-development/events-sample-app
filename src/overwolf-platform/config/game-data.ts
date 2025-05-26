@@ -676,6 +676,13 @@ const data: { [id: number]: GameData } = {
     ],
     description: 'REPO',
   },
+   25884: {
+      interestedInFeatures: [
+        'game_info',
+        'match_info'
+      ],
+      description: 'Splitgate 2',
+  },
 };
 
 export default data;
