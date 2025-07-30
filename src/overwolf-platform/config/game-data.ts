@@ -683,6 +683,13 @@ const data: { [id: number]: GameData } = {
       ],
       description: 'Splitgate 2',
   },
+  26092: {
+      interestedInFeatures: [
+        'game_info',
+        'match_info'
+      ],
+      description: 'Peak',
+  },
 };
 
 export default data;
