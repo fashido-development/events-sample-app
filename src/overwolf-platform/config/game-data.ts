@@ -27,7 +27,7 @@ const data: { [id: number]: GameData } = {
       'heal',
       `gold`,
       `location`,
-    //'live_client_data',
+    //  'live_client_data',
       'jungle_camps',
       'team_frames',
       //TFT:
@@ -63,7 +63,7 @@ const data: { [id: number]: GameData } = {
       'damage',
       'heal',
       'gold',
-    // 'live_client_data',
+      // 'live_client_data',
       'jungle_camps',
       'team_frames',
       'me',
@@ -113,7 +113,7 @@ const data: { [id: number]: GameData } = {
       'hero_pool',
       'game',
       'game_state',
-    // these are also supported but spam the console as they happen a lot:
+      // these are also supported but spam the console as they happen a lot:
       'clock_time_changed',
       'xpm',
       'gpm',
@@ -121,7 +121,7 @@ const data: { [id: number]: GameData } = {
       'hero_buyback_info_changed',
       'hero_health_mana_info',
       'hero_ability_cooldown_changed',
-      'hero_item_cooldown_changed', 
+      'hero_item_cooldown_changed',
       `damage`
     ],
     description: 'Dota match state data',
@@ -311,7 +311,7 @@ const data: { [id: number]: GameData } = {
     description: 'Diablo 2 data',
   },
   22700: {
-    interestedInFeatures: ['match_info','game_info','me','location'],
+    interestedInFeatures: ['match_info', 'game_info', 'me', 'location'],
     description: 'Diablo 4 data',
   },
   21854: {
@@ -646,7 +646,7 @@ const data: { [id: number]: GameData } = {
       'match_info'
     ],
     description: 'Supervive',
-    
+
   },
   24890: {
     interestedInFeatures: [
@@ -662,12 +662,12 @@ const data: { [id: number]: GameData } = {
     ],
     description: 'Street Fighter 6',
   },
-    25446: {
-      interestedInFeatures: [
-        'game_info',
-        'match_info'
-      ],
-      description: 'Monster Hunter Wilds',
+  25446: {
+    interestedInFeatures: [
+      'game_info',
+      'match_info'
+    ],
+    description: 'Monster Hunter Wilds',
   },
   25448: {
     interestedInFeatures: [
@@ -676,19 +676,33 @@ const data: { [id: number]: GameData } = {
     ],
     description: 'REPO',
   },
-   25884: {
-      interestedInFeatures: [
-        'game_info',
-        'match_info'
-      ],
-      description: 'Splitgate 2',
+  25884: {
+    interestedInFeatures: [
+      'game_info',
+      'match_info'
+    ],
+    description: 'Splitgate 2',
   },
   26092: {
-      interestedInFeatures: [
-        'game_info',
-        'match_info'
-      ],
-      description: 'Peak',
+    interestedInFeatures: [
+      'game_info',
+      'match_info'
+    ],
+    description: 'Peak',
+  },
+   22176: {
+    interestedInFeatures: [
+      'game_info',
+      'match_info'
+    ],
+    description: 'Minecraft Bedrock',
+  },
+  26840: {
+    interestedInFeatures: [
+      'game_info',
+      'match_info'
+    ],
+    description: '2xKO',
   },
 };
 
