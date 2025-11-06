@@ -65,10 +65,6 @@ Failed to subscribe to ${failed.length} features: ${JSON.stringify(
     this.gepService.on('error', this.gepConsumer.onGEPError);
   }
 
-  private messageReceivedListener(message: any) {
-    console.log(message);
-  }
-
   private connectionStoppedListener() {
     if (this.gepService) {
       this.gepService.off('gameEvent', this.gepConsumer.onNewGameEvent);
@@ -82,29 +78,32 @@ Failed to subscribe to ${failed.length} features: ${JSON.stringify(
     );
   }
 
+  private messageReceivedListener = (message: any) => {
+    // message shape expected from host:
+    // { type: 'game-launched', text: 'Game was launched: ...' }
+    if (message?.type === 'game-launched') {
+      console.log(message.text);
+      // TODO: optionally forward this to your UI layer / state store
+      // e.g., window.postMessage / Redux / signal / DOM update, etc.
+    } else {
+      console.log(message);
+    }
+  };
+
   /**
    * Initializes this app
    */
   public init(): void {
     this.communicationConnector.once(
       'connectionReceived',
-      (container: DependencyContainer) =>
-        this.connectionReceivedListener(container),
+      (container: DependencyContainer) => this.connectionReceivedListener(container),
     );
 
-    this.communicationConnector.on(
-      'messageReceived',
-      this.messageReceivedListener,
-    );
+    this.communicationConnector.on('messageReceived', this.messageReceivedListener);
 
-    this.communicationConnector.once('connectionStopped', () =>
-      this.connectionStoppedListener(),
-    );
+    this.communicationConnector.once('connectionStopped', () => this.connectionStoppedListener());
 
-    this.communicationConnector.connectToMain(
-      'in-game',
-      this.communicationConnector,
-    );
+    this.communicationConnector.connectToMain('in-game', this.communicationConnector);
   }
 }
 

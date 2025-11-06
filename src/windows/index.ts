@@ -43,6 +43,9 @@ container.registerSingleton(CommunicationHostToken, CommunicationHostService);
 export class IndexController {
   private readonly inGameName = 'in-game';
 
+  // NEW: cache last "launched" text to send when the in-game connects
+  private lastLaunchedText: string | null = null;
+
   public constructor(
     @inject(GEPToken)
     private readonly gepService: GEPServiceBase,
@@ -60,52 +63,50 @@ export class IndexController {
     this.init();
   }
 
-  /**
-   * Initializes this app
-   */
   public init(): void {
-    // Register for the `gameLaunched` event from the game detection service
-    this.gameDetectionService.on(
-      'gameLaunched',
-      (payload: GameLaunchedPayload) => this.onGameStart(payload),
-    );
-    // Register for the `gameClosed` event from the gameDetectionService
-    this.gameDetectionService.on('gameClosed', (payload: GameClosedPayload) =>
-      this.onGameClosed(payload),
-    );
-    // Register for the `postGame` event from the gameDetectionService
+    this.gameDetectionService.on('gameLaunched', (payload) => this.onGameStart(payload));
+    this.gameDetectionService.on('gameClosed', (payload) => this.onGameClosed(payload));
     this.gameDetectionService.on('postGame', this.onPostGame);
 
-    this.communicationBusHostService.addListener(
-      'windowConnected',
-      this.connectInGame,
-    );
+    this.communicationBusHostService.addListener('windowConnected', this.connectInGame);
 
-    // this.communicationBusHostService.addListener(
-    //   'windowDisconnected',
-    //   () => {},
-    // );
-
-    // Start the game detection service, kickstarting the entire events chain
     this.gameDetectionService.start();
   }
 
-  private connectInGame(event: CommunicationBustHostPayload) {
+  private connectInGame = (event: CommunicationBustHostPayload) => {
     const inGameConnector = event.connector;
     inGameConnector.connectionReceived(container);
-  }
+
+    // If we already know about a launched game, send that info to the in-game window now
+    if (this.lastLaunchedText) {
+      // NOTE: if your API is called postMessage/sendMessageToWindow/broadcastMessage, swap here:
+      this.communicationBusHostService.sendMessage(this.inGameName, {
+        type: 'game-launched',
+        text: this.lastLaunchedText,
+      });
+    }
+  };
 
   private onGameStart(gameLaunch: GameLaunchedPayload) {
-    console.log(`Game was launched: ${gameLaunch.name} ${gameLaunch.id}`);
-    // Rechecks and saves the current GEP version, for logs backup
+    const text = `Game was launched: ${gameLaunch.name} ${gameLaunch.id}`;
+    console.log(text);
+
+    // cache it for when/if the in-game window connects (or reconnects)
+    this.lastLaunchedText = text;
+
     this.loggingService.reCheckGEPVersion();
-    // Get the configured data for the launched game
+
     const gameConfig = gameData[gameLaunch.id];
-    // If the detected game is configured for events
     if (gameConfig) {
-      // Open the in-game window
       this.windowManagerService.openWindow(this.inGameName);
-      // Run the game launched logic of the gep service
+
+      // Try to send immediately too (in case the in-game is already connected).
+      // Safe even if nobody is listening; we still keep the cache for connect-time replay.
+      this.communicationBusHostService.sendMessage(this.inGameName, {
+        type: 'game-launched',
+        text,
+      });
+
       this.gepService.onGameLaunched(gameConfig.interestedInFeatures);
     }
   }
@@ -113,9 +114,7 @@ export class IndexController {
   private onGameClosed(gameClosed: GameClosedPayload) {
     console.log(`Game was closed: ${gameClosed.name}`);
     const gameConfig = gameData[gameClosed.id];
-    // If the detected game is configured for events
     if (gameConfig) {
-      // Close the in-game window
       this.windowManagerService.closeWindow(this.inGameName, (window) => {
         this.communicationBusHostService.windowDisconnected(window.windowName);
         this.loggingService.backupLog(
@@ -126,8 +125,10 @@ export class IndexController {
             .replace(/\.\d+Z/gm, '')}`,
         );
       });
-      // Run game closed cleanup of the gep service
       this.gepService.onGameClosed();
+
+      // Optional: clear the cached text after the game closes
+      this.lastLaunchedText = null;
     }
   }
 
