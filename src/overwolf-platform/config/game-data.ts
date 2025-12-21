@@ -704,6 +704,20 @@ const data: { [id: number]: GameData } = {
     ],
     description: '2xKO',
   },
+    27168: {
+    interestedInFeatures: [
+      'game_info',
+      'match_info'
+    ],
+    description: 'Arc Raides',
+  },
+   26462: {
+    interestedInFeatures: [
+      'game_info',
+      'match_info'
+    ],
+    description: 'Minecraft Bedrock',
+  }
 };
 
 export default data;
