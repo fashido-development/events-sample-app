@@ -27,6 +27,7 @@ const data: { [id: number]: GameData } = {
       'heal',
       `gold`,
       `location`,
+      'panel_location',
     //  'live_client_data',
       'jungle_camps',
       'team_frames',
@@ -397,7 +398,7 @@ const data: { [id: number]: GameData } = {
     description: 'Valheim data',
   },
   8954: {
-    interestedInFeatures: ['game_info', 'match_info'],
+    interestedInFeatures: ['game_info', 'match_info', 'chat'],
     description: 'Warframe data',
   },
   6365: {
@@ -717,6 +718,13 @@ const data: { [id: number]: GameData } = {
       'match_info'
     ],
     description: 'Minecraft Bedrock',
+  },
+    27618: {
+    interestedInFeatures: [
+      'game_info',
+      'match_info'
+    ],
+    description: 'Hytale',
   }
 };
 
