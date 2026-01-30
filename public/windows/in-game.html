@@ -1,14 +1,378 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8" />
-    <title>Overwolf Generic Sample App - Main</title>
-  </head>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Overframe</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #0a0a0c;
+            --bg-surface: #121215;
+            --bg-panel: #18181b;
+            --accent: #ff8800;
+            --accent-soft: rgba(255, 123, 0, 0.1);
+            --border: #2a2827;
+            --text-main: #e4e4e7;
+            --text-muted: #71717a;
+            --glass: rgba(18, 18, 21, 0.98);
+            --font-sans: 'Inter', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            --rarity-vaulted: #f59e0b;
+            --rarity-locked: #ef4444;
+            --control-height: 44px;
+        }
 
-  <body style="background-color: rgba(240, 7, 7, 0); overflow: hidden">
-    <div>
-      <p>GEP Data</p>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+
+        body {
+            background: var(--bg-base);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+
+        /* Window Title Bar */
+        .title-bar {
+            height: 40px;
+            background: var(--bg-surface);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            user-select: none;
+            z-index: 100;
+        }
+
+        .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; text-transform: uppercase; font-size: 13px; color: var(--accent); }
+        .brand svg { width: 20px; height: 20px; fill: var(--accent); }
+        .window-controls { display: flex; gap: 12px; }
+        .control-btn { width: 12px; height: 12px; border-radius: 50%; background: var(--border); cursor: pointer; }
+
+        .app-container { display: flex; flex: 1; overflow: hidden; }
+        nav { width: 240px; background: var(--bg-surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+
+        .profile-snapshot { padding: 24px 20px; background: linear-gradient(to bottom, var(--accent-soft), transparent); border-bottom: 1px solid var(--border); margin-bottom: 12px; }
+        .profile-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+        .mastery-badge { width: 48px; height: 48px; background: var(--bg-base); border: 1px solid var(--accent); border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 0 15px var(--accent-soft); }
+        .m-rank { font-family: var(--font-mono); font-size: 18px; font-weight: 700; color: var(--accent); }
+        .m-label { font-size: 8px; text-transform: uppercase; opacity: 0.6; }
+        .username { font-size: 14px; font-weight: 700; }
+        .m-progress-bg { height: 4px; background: var(--bg-base); border-radius: 2px; width: 100%; margin-top: 8px; overflow: hidden; }
+        .m-progress-fill { height: 100%; background: var(--accent); width: 65%; box-shadow: 0 0 8px var(--accent); }
+
+        .nav-items { padding: 0 12px; display: flex; flex-direction: column; gap: 4px; }
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 6px; color: var(--text-muted); text-decoration: none; font-size: 13px; font-weight: 500; transition: 0.2s; }
+        .nav-item:hover, .nav-item.active { color: var(--text-main); background: rgba(255, 255, 255, 0.03); }
+        .nav-item.active { color: var(--accent); background: var(--accent-soft); }
+
+        main { flex: 1; padding: 32px; overflow-y: auto; background: radial-gradient(circle at 50% 0%, rgba(0, 242, 255, 0.02), transparent 50%); }
+        .section-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+
+        /* --- SEARCH & ACTION ROW ALIGNMENT --- */
+        .search-action-row { 
+            display: flex; 
+            gap: 12px; 
+            margin-bottom: 24px; 
+            align-items: center; /* Vertical alignment */
+            height: var(--control-height);
+        }
+        
+        .search-container { 
+            position: relative; 
+            flex: 1; 
+            height: 100%;
+            display: flex;
+            align-items: center;
+        }
+        
+        /* Precursor Search Icon */
+        .search-input i.search-icon { 
+            position: absolute; 
+            left: 14px; 
+            color: var(--text-muted);
+            pointer-events: none;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-input { 
+            width: 100%; 
+            height: 100%;
+            background: var(--bg-panel);
+            background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="%2371717A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"%3E%3Ccircle cx="11" cy="11" r="8"/%3E%3Cline x1="21" y1="21" x2="16.65" y2="16.65"/%3E%3C/svg%3E');
+            background-repeat: no-repeat;
+            background-position: 14px center;
+            border: 1px solid var(--border); 
+            border-radius: 8px; 
+            padding: 0 16px 0 44px; /* Space for the icon precursor */
+            color: var(--text-main); 
+            font-size: 14px; 
+            outline: none; 
+            transition: 0.2s;
+        }
+        .search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+
+        .filter-dropdown-trigger { 
+            position: relative;
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            height: 100%;
+            padding: 0 16px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            color: var(--text-main);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            white-space: nowrap;
+        }
+        .filter-dropdown-trigger:hover { border-color: var(--accent); background: rgba(255, 255, 255, 0.02); }
+
+        /* Hover Menu */
+        .filter-menu {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            width: 300px;
+            background: var(--glass);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 24px 48px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .filter-dropdown-trigger:hover .filter-menu { opacity: 1; visibility: visible; transform: translateY(0); }
+
+        .filter-group-title { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); margin-bottom: 12px; font-weight: 700; opacity: 0.8; }
+        .filter-options { display: flex; flex-direction: column; gap: 10px; }
+        
+        .toggle-item { display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; }
+        .toggle-label { font-size: 12px; color: var(--text-main); font-weight: 500; }
+        
+        .switch { position: relative; display: inline-block; width: 34px; height: 18px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border); transition: .2s; border-radius: 34px; border: 1px solid transparent; }
+        .slider:before { position: absolute; content: ""; height: 12px; width: 12px; left: 2px; bottom: 2px; background-color: var(--text-muted); transition: .2s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--accent-soft); border-color: var(--accent); }
+        input:checked + .slider:before { transform: translateX(16px); background-color: var(--accent); }
+
+        /* Category Tabs */
+        .category-filter { display: flex; gap: 8px; margin-bottom: 32px; overflow-x: auto; padding-bottom: 8px; }
+        .filter-btn { background: var(--bg-panel); border: 1px solid var(--border); padding: 8px 16px; border-radius: 4px; font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--text-muted); cursor: pointer; transition: 0.2s; white-space: nowrap; }
+        .filter-btn:hover { border-color: var(--text-muted); color: var(--text-main); }
+        .filter-btn.active { background: var(--accent); color: var(--bg-base); border-color: var(--accent); }
+
+        /* Foundry Grid */
+        .foundry-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        .blueprint-card { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 16px; transition: transform 0.2s, border-color 0.2s; position: relative; }
+        .blueprint-card:hover { border-color: #3f3f46; transform: translateY(-2px); }
+
+        .card-top { display: flex; gap: 16px; }
+        .item-preview-skeleton { width: 80px; height: 80px; background: var(--bg-surface); border-radius: 8px; flex-shrink: 0; }
+        .item-info-main h3 { font-size: 15px; font-weight: 700; margin-bottom: 4px; padding-right: 24px; }
+
+        .components-row { display: flex; flex-wrap: wrap; gap: 8px; }
+        .comp-slot { display: flex; align-items: center; gap: 6px; background: var(--bg-surface); padding: 4px 8px 4px 4px; border-radius: 6px; border: 1px solid var(--border); }
+        .comp-icon-skeleton { width: 20px; height: 20px; background: var(--border); border-radius: 3px; }
+        .comp-req { font-size: 10px; font-family: var(--font-mono); font-weight: 600; }
+
+        .card-footer { margin-top: auto; padding-top: 12px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .tag { font-size: 10px; font-weight: 700; text-transform: uppercase; padding: 2px 8px; border-radius: 100px; }
+        .tag-vaulted { color: var(--rarity-vaulted); background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2); }
+        .tag-locked { color: var(--rarity-locked); background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); }
+
+        /* Favorite Icon Placement */
+        .favorite-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .favorite-btn:hover { color: var(--accent); transform: scale(1.1); }
+        .favorite-btn.active { color: var(--accent); }
+
+        .skeleton { background: linear-gradient(90deg, #18181b 25%, #27272a 50%, #18181b 75%); background-size: 200% 100%; animation: loading 1.5s infinite; }
+        @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    </style>
+</head>
+<body>
+
+    <div class="title-bar">
+        <div class="brand"><svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#FFFFFF"><path d="M313-114q-19.3 0-35.15-9.5Q262-133 254-149l-86-153h67l48.52 93H381v-40h-72.89l-47.69-93H145L87-447q-3.8-8-6.4-15.83-2.6-7.84-2.6-17.39 0-8.98 9-33.78l59.12-104H261l46.78-93H381v-40h-96.79L236-658h-67l85-153q7.57-15.86 23.56-25.43Q293.54-846 313-846h79q29.1 0 48.55 19.65Q460-806.7 460-779v164h-71l-40 40h111v149H356l-45.52-91H213l-40 40h111l47.47 91H460v205q0 27.7-19.45 47.35Q421.1-114 392-114h-79Zm255 0q-29.1 0-48.55-19.65Q500-153.3 500-181v-205h129l47.11-91H787l-40-40h-96.48L604-426H500v-149h111l-40-40h-71v-164q0-27.7 19.45-47.35Q538.9-846 568-846h80q19.3 0 35.15 9.5Q699-827 707-811l84 152h-65.51l-49.37-92H579v40h73.57l46.51 93H814l59 105q4 8.33 6.5 16.17Q882-489 882-480q0 10-9 33l-58 105H699.58l-46.69 93H579v40h97.48L725-302h67l-85 153q-8 16-23.85 25.5Q667.3-114 648-114h-80Z"/></svg>Overframe</div>
+        <div class="window-controls"><div class="control-btn"></div><div class="control-btn" style="background: #ef4444;"></div></div>
     </div>
-    <div id="dvDiff" style="width: 100%; height: 100%"></div>
-  </body>
+
+    <div class="app-container">
+        <nav>
+            <div class="profile-snapshot">
+                <div class="profile-header">
+                    <div class="mastery-badge"><span class="m-label">Rank</span><span class="m-rank">24</span></div>
+                    <div style="width: calc(100% - 48px);"><div class="username">ralsei</div><div class="m-progress-bg"><div class="m-progress-fill"></div></div></div>
+                </div>
+            </div>
+            <div class="nav-items">
+                <a href="#" class="nav-item active"><i data-lucide="hammer" size="16"></i> Foundry</a>
+                <a href="#" class="nav-item"><i data-lucide="graduation-cap" size="16"></i> Mastery Helper</a>
+                <a href="#" class="nav-item"><i data-lucide="box" size="16"></i> Inventory</a>
+                <a href="#" class="nav-item"><i data-lucide="gem" size="16"></i> Relic Planner</a>
+                <a href="#" class="nav-item"><i data-lucide="sparkles" size="16"></i> Rivens</a>
+            </div>
+        </nav>
+
+        <main>
+            <div class="section-label"><i data-lucide="hammer" size="14"></i> Foundry Management</div>
+
+            <div class="search-action-row">
+                <div class="search-container">
+                    <input type="text" class="search-input" placeholder="Search blueprints, components, or resources...">
+                </div>
+                
+                <div class="filter-dropdown-trigger">
+                    <i data-lucide="sliders-horizontal" size="18"></i>
+                    Advanced Filters
+                    
+                    <div class="filter-menu">
+                        <div>
+                            <div class="filter-group-title">Blueprint Status</div>
+                            <div class="filter-options">
+                                <label class="toggle-item"><span class="toggle-label">Ready To Build</span><div class="switch"><input type="checkbox"><span class="slider"></span></div></label>
+                                <label class="toggle-item"><span class="toggle-label">Owned</span><div class="switch"><input type="checkbox"><span class="slider"></span></div></label>
+                                <label class="toggle-item"><span class="toggle-label">Favorite</span><div class="switch"><input type="checkbox"><span class="slider"></span></div></label>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="filter-group-title">Mastery & Progress</div>
+                            <div class="filter-options">
+                                <label class="toggle-item"><span class="toggle-label">Mastered</span><div class="switch"><input type="checkbox"><span class="slider"></span></div></label>
+                                <label class="toggle-item"><span class="toggle-label">Unmastered</span><div class="switch"><input type="checkbox" checked><span class="slider"></span></div></label>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="filter-group-title">Advanced Tags</div>
+                            <div class="filter-options">
+                                <label class="toggle-item"><span class="toggle-label">Prime Only</span><div class="switch"><input type="checkbox"><span class="slider"></span></div></label>
+                                <label class="toggle-item"><span class="toggle-label">Vaulted</span><div class="switch"><input type="checkbox"><span class="slider"></span></div></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="category-filter">
+                <button class="filter-btn active">All</button>
+                <button class="filter-btn">Warframe</button>
+                <button class="filter-btn">Primary</button>
+                <button class="filter-btn">Secondary</button>
+                <button class="filter-btn">Melee</button>
+                <button class="filter-btn">Companion</button>
+            </div>
+
+            <div class="foundry-grid">
+                <div class="blueprint-card">
+                    <button class="favorite-btn active"><i data-lucide="star" size="16"></i></button>
+                    <div class="card-top">
+                        <div class="item-preview-skeleton skeleton"></div>
+                        <div class="item-info-main">
+                            <h3>Excalibur Umbra</h3>
+                            <div class="components-row">
+                                <div class="comp-slot"><div class="comp-icon-skeleton"></div><span class="comp-req">1</span></div>
+                                <div class="comp-slot"><div class="comp-icon-skeleton"></div><span class="comp-req">2k</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer"><span class="tag tag-vaulted">Vaulted</span></div>
+                </div>
+
+                <div class="blueprint-card">
+                    <button class="favorite-btn"><i data-lucide="star" size="16"></i></button>
+                    <div class="card-top">
+                        <div class="item-preview-skeleton skeleton"></div>
+                        <div class="item-info-main">
+                            <h3>Soma Prime</h3>
+                            <div class="components-row">
+                                <div class="comp-slot"><div class="comp-icon-skeleton"></div><span class="comp-req">1</span></div>
+                                <div class="comp-slot"><div class="comp-icon-skeleton"></div><span class="comp-req">12</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer"><span class="tag tag-locked">MR 14 Required</span></div>
+                </div>
+
+                <div class="blueprint-card">
+                    <button class="favorite-btn"><i data-lucide="star" size="16"></i></button>
+                    <div class="card-top">
+                        <div class="item-preview-skeleton skeleton"></div>
+                        <div class="item-info-main">
+                            <h3>Nikana Prime</h3>
+                            <div class="components-row">
+                                <div class="comp-slot"><div class="comp-icon-skeleton"></div><span class="comp-req">1</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer"><span class="tag tag-vaulted">Vaulted</span></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        lucide.createIcons();
+        
+        const filters = document.querySelectorAll('.filter-btn');
+        filters.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filters.forEach(f => f.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+
+        // Toggle favorites
+        document.querySelectorAll('.favorite-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                btn.classList.toggle('active');
+                const icon = btn.querySelector('i');
+                if(btn.classList.contains('active')) {
+                    icon.setAttribute('fill', 'var(--accent)');
+                } else {
+                    icon.removeAttribute('fill');
+                }
+            });
+        });
+
+        document.querySelector('.filter-menu').addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+    </script>
+</body>
 </html>

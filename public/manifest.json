@@ -23,14 +23,6 @@
     },
     "start_window": "index",
     "windows": {
-      "index": {
-        "open_dev_tools": true,
-        "file": "windows/index/page.html",
-        "is_background_page": true,
-        "native_window": true,
-        "desktop_only": true,
-        "dev_tools_window_style": false
-      },
       "in-game": {
         "open_dev_tools": true,
         "file": "windows/in-game/page.html",
